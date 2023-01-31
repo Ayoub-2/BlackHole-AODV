@@ -159,7 +159,7 @@ int main(int argc, char * argv[]) {
   auto tm = *std::localtime(&t);
 
   std::ostringstream oss;
-  oss << std::put_time(&tm, "-%d-%m-%Y_%H-%M-%S");
+  oss << std::put_time(&tm, "%d-%H-%M-%S");
   auto s_datetime = oss.str();
-  monitor -> SerializeToXmlFile("blackhole.flowmon" + s_datetime, true, true); // output file
+  monitor -> SerializeToXmlFile("blackhole-" + s_datetime + ".flowmon", true, true); // output file
 }
