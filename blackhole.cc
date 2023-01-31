@@ -99,7 +99,7 @@ int main(int argc, char * argv[]) {
       sinkPort));
   ApplicationContainer sinkApps = packetSinkHelper.Install(c.Get(5));
   sinkApps.Start(Seconds(0.));
-  sinkApps.Stop(Seconds(1000.));
+  sinkApps.Stop(Seconds(100.));
   //source at N5
   Ptr < Socket > ns3UdpSocket = Socket::CreateSocket(c.Get(5),
     UdpSocketFactory::GetTypeId());
@@ -108,7 +108,7 @@ int main(int argc, char * argv[]) {
   app -> Setup(ns3UdpSocket, sinkAddress, 1024, 48, DataRate("1000Kbps"));
   c.Get(7) -> AddApplication(app);
   app -> SetStartTime(Seconds(15.));
-  app -> SetStopTime(Seconds(1000.));
+  app -> SetStopTime(Seconds(100.));
   // Set Mobility for all nodes
   MobilityHelper mobility;
   ObjectFactory ofact;
@@ -134,8 +134,9 @@ int main(int argc, char * argv[]) {
   Ptr < FlowMonitor > monitor = flowmon.InstallAll();
   // Run simulation
   NS_LOG_INFO("Run Simulation.");
-  Simulator::Stop(Seconds(1000.0));
+  Simulator::Stop(Seconds(100.0));
   Simulator::Run();
+  Simulator::Destroy ();
   monitor -> CheckForLostPackets();
   Ptr < Ipv4FlowClassifier > classifier =
     DynamicCast < Ipv4FlowClassifier > (flowmon.GetClassifier());
