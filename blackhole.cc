@@ -105,7 +105,7 @@ int main(int argc, char * argv[]) {
   app -> SetStartTime(Seconds(15.));
   app -> SetStopTime(Seconds(1000.));
   // Set Mobility for all nodes
-  MobilityHelper mobility;
+ /* MobilityHelper mobility;
   Ptr < ListPositionAllocator > positionAlloc =
     CreateObject < ListPositionAllocator > ();
   int pos = 200;
@@ -116,6 +116,19 @@ int main(int argc, char * argv[]) {
   mobility.SetPositionAllocator(positionAlloc);
  // mobility.SetMobilityModel("ns3::RandomWaypointMobilityModel", "PositionAllocator", PointerValue(positionAlloc) );
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+  mobility.Install(c);
+  */
+  MobilityHelper mobility;
+  ObjectFactory ofact;
+  ofact.SetTypeId("ns3::RandomRectanglePositionAllocator");
+  ofact.Set ("X", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=500.0]"));
+  ofact.Set ("Y", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=500.0]"));
+  Ptr<PositionAllocator> positionAlloc = ofact.Create()->GetObject<PositionAllocator>();
+  mobility.SetMobilityModel("ns3::RandomWaypointMobilityModel",
+	                          "Speed", StringValue ("ns3::UniformRandomVariable[Min=0|Max=60]"),
+	                          "Pause", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"),
+	                          "PositionAllocator", PointerValue(positionAlloc));
+  mobility.SetPositionAllocator (positionAlloc);
   mobility.Install(c);
   AnimationInterface anim("blackhole.xml");
   int pos2 = 0;
