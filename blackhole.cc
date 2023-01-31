@@ -12,6 +12,11 @@
 #include "ns3/mobility-module.h"
 #include "myapp.h"
 
+#include <iostream>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
+
 NS_LOG_COMPONENT_DEFINE("Blackhole");
 using namespace ns3;
 void
@@ -105,19 +110,6 @@ int main(int argc, char * argv[]) {
   app -> SetStartTime(Seconds(15.));
   app -> SetStopTime(Seconds(1000.));
   // Set Mobility for all nodes
- /* MobilityHelper mobility;
-  Ptr < ListPositionAllocator > positionAlloc =
-    CreateObject < ListPositionAllocator > ();
-  int pos = 200;
-  for (int i = 0; i < 20; i++) {
-    positionAlloc -> Add(Vector(pos, 0, 0));
-    pos = pos + 200;
-  }
-  mobility.SetPositionAllocator(positionAlloc);
- // mobility.SetMobilityModel("ns3::RandomWaypointMobilityModel", "PositionAllocator", PointerValue(positionAlloc) );
-  mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-  mobility.Install(c);
-  */
   MobilityHelper mobility;
   ObjectFactory ofact;
   ofact.SetTypeId("ns3::RandomRectanglePositionAllocator");
@@ -131,25 +123,13 @@ int main(int argc, char * argv[]) {
   mobility.SetPositionAllocator (positionAlloc);
   mobility.Install(c);
   AnimationInterface anim("blackhole.xml");
-  int pos2 = 0;
-  for (int i = 0; i < 10; i++) {
-    AnimationInterface::SetConstantPosition(c.Get(i), pos2, 500);
-    pos2 = pos2 + 150;
-  }
-  pos2 = 0;
-  for (int i = 10; i < 20; i++) {
-    AnimationInterface::SetConstantPosition(c.Get(i), pos2, 600);
-    pos2 = pos2 + 150;
-  }
   anim.EnablePacketMetadata(true);
   Ptr < OutputStreamWrapper > routingStream =
     Create < OutputStreamWrapper > ("blackhole.routes", std::ios::out);
   aodv.PrintRoutingTableAllAt(Seconds(45), routingStream);
-  // Trace Received Packets
   Config::ConnectWithoutContext(
     "/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx",
     MakeCallback( & ReceivePacket));
-  // Calculate Throughput using Flowmonitor
   FlowMonitorHelper flowmon;
   Ptr < FlowMonitor > monitor = flowmon.InstallAll();
   // Run simulation
@@ -175,5 +155,11 @@ int main(int argc, char * argv[]) {
       1024 / 1024 <<
       " Mbps\n";
   }
-  monitor -> SerializeToXmlFile("blackhole.flowmon", true, true); // output file
+  auto t = std::time(nullptr);
+  auto tm = *std::localtime(&t);
+
+  std::ostringstream oss;
+  oss << std::put_time(&tm, "-%d-%m-%Y_%H-%M-%S");
+  auto s_datetime = oss.str();
+  monitor -> SerializeToXmlFile("blackhole.flowmon" + s_datetime, true, true); // output file
 }
